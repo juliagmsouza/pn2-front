@@ -1,26 +1,65 @@
 <template>
-  <div :class="backgroundMapper[selectedAlbum.name.toLowerCase()]" id="app">
+  <div :class="backgroundMapper[albums[index].name.toLowerCase()]" id="app">
     <div>
-    <b-carousel controls no-animation>
-      <b-carousel-slide v-for="(album, index) in albums" :key="index" :img-src="album.image_url" class="aa">
-      </b-carousel-slide>
-    </b-carousel>
-  </div>
+      oiaaaa
+    </div>
+    <div class="d-flex h-80 align-items-center"> 
+      <b-row class="w-100" align-h="center">
+        <b-col class="align-self-center d-flex justify-content-end">
+          <chevron-left-icon
+          style="cursor: pointer"
+          size="6x"
+          @click="previousAlbum"
+          >
+        </chevron-left-icon>
+        </b-col>
+        <b-col class="d-flex justify-content-center" cols="3">
+          <b-img v-if="albums[index - 1]" :src="albums[index - 1].image_url" class="rounded image-size">
+          </b-img>
+          <b-img v-else :src="albums[albums.length - 1].image_url" class="rounded image-size">
+            </b-img>
+        </b-col>
+        <b-col class="d-flex justify-content-center" cols="3">
+          <b-img :src="albums[index].image_url" class="rounded image-size">
+          </b-img>
+        </b-col>
+        <b-col class="d-flex justify-content-center" cols="3">
+          <b-img v-if="albums[index + 1]" :src="albums[index + 1].image_url" class="rounded image-size">
+          </b-img>
+          <b-img v-else :src="albums[0].image_url" class="rounded image-size"></b-img>
+
+        </b-col>
+        <b-col class="align-self-center">
+          <chevron-right-icon
+          size="6x"
+          style="cursor: pointer"
+          @click="nextAlbum"
+          >
+        </chevron-right-icon>
+        </b-col>
+      </b-row>
+    </div>
   </div>
 </template>
 
 <script>
+import { ChevronLeftIcon, ChevronRightIcon} from 'vue-feather-icons'
 
 export default {
+  components: {
+    ChevronLeftIcon,
+    ChevronRightIcon,
+  },
   name: 'App',
   data() {
     return {
+      index: 1,
       selectedAlbum: {
-        name: 'lover'
+        name: 'evermore'
       },
       albums: [
         {
-          id: 2,
+          id: 1,
           name: "evermore",
           valor: "150.75",
           year: "2020",
@@ -49,10 +88,66 @@ export default {
         },
         {
           id: 2,
-          name: "evermore",
+          name: "lover",
           valor: "150.75",
           year: "2020",
           image_url: 'https://people.com/thmb/vvDOonfXdN5fSqLAioLgg_9AJMY=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc():focal(999x0:1001x2):format(webp)/taylor-swift-lover-2000-e4a62abb38b9483e8d371eda823d2fcb.jpg',
+          description: 'Evermore é o nono álbum de estúdio da cantora e compositora estadunidense Taylor Swift. O seu lançamento ocorreu em 11 de dezembro de 2020, através da gravadora Republic Records, menos de cinco meses após Folklore, seu oitavo álbum de estúdio.',
+          recorder: 'Republic Records',
+          tracks: [
+            'willow',
+            'champagne problems',
+            'gold rush',
+            '\'this the damn season',
+            'tolerate it',
+            'no body, no crime (feat. HAIM)',
+            'hapiness',
+            'dorothea',
+            'coney island (feat. The National)',
+            'ivy',
+            'cowboy like me',
+            'long story short',
+            'marjorie',
+            'closure',
+            'evermore (feat. Bon Iver)',
+            'right where you left me - bonus track',
+            'it\'s time to go - bonus track',
+          ]
+        },
+        {
+          id: 3,
+          name: "Taylor Swift",
+          valor: "150.75",
+          year: "2020",
+          image_url: 'https://people.com/thmb/A7_leo8hc_wPis3erIdrtJYVsG8=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc():focal(999x0:1001x2):format(webp)/taylor-swift-albums-1-93026ca98408417097660e117a10a6a9.jpg',
+          description: 'Evermore é o nono álbum de estúdio da cantora e compositora estadunidense Taylor Swift. O seu lançamento ocorreu em 11 de dezembro de 2020, através da gravadora Republic Records, menos de cinco meses após Folklore, seu oitavo álbum de estúdio.',
+          recorder: 'Republic Records',
+          tracks: [
+            'willow',
+            'champagne problems',
+            'gold rush',
+            '\'this the damn season',
+            'tolerate it',
+            'no body, no crime (feat. HAIM)',
+            'hapiness',
+            'dorothea',
+            'coney island (feat. The National)',
+            'ivy',
+            'cowboy like me',
+            'long story short',
+            'marjorie',
+            'closure',
+            'evermore (feat. Bon Iver)',
+            'right where you left me - bonus track',
+            'it\'s time to go - bonus track',
+          ]
+        },
+        {
+          id: 4,
+          name: "Reputation",
+          valor: "150.75",
+          year: "2020",
+          image_url: 'https://people.com/thmb/DWnqc5Gyvvo0-YQnqNT11rZSqzQ=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc():focal(992x0:994x2):format(webp)/taylor-swift7-2000-48f9bfb372c34e36866773b1ede0b372.jpg',
           description: 'Evermore é o nono álbum de estúdio da cantora e compositora estadunidense Taylor Swift. O seu lançamento ocorreu em 11 de dezembro de 2020, através da gravadora Republic Records, menos de cinco meses após Folklore, seu oitavo álbum de estúdio.',
           recorder: 'Republic Records',
           tracks: [
@@ -88,6 +183,18 @@ export default {
         'evermore': 'evermore-background-color',
         'midnights': 'midnights-background-color'
       }
+    }
+  },
+  methods: {
+    nextAlbum() {
+      if(this.index === this.albums.length -1) {
+        this.index = 0;
+      } else this.index++;
+    },
+    previousAlbum() {
+      if(this.index === 0) {
+        this.index = this.albums.length - 1;
+      } else this.index--;
     }
   }
 }
@@ -150,17 +257,21 @@ body {
 }
 
 .evermore-background-color {
-  background: rgb(229,147,95);
-  background: radial-gradient(circle, rgba(229,147,95,1) 0%, rgba(106,69,46,1) 100%);
+  background: rgb(229, 147, 95);
+  background: radial-gradient(circle, rgba(229, 147, 95, 1) 0%, rgba(106, 69, 46, 1) 100%);
 }
 
 .midnights-background-color {
   background: rgb(118, 146, 167);
   background: radial-gradient(circle, rgba(118, 146, 167, 1) 0%, rgba(2, 9, 35, 1) 100%);
 }
-.aa {
-  max-width: 500px;
-  max-height: 700px;
+
+.image-size {
+  max-width: 100%;
+  height: 100%;
 }
 
+.main-row-position {
+  padding-top: 50px
+}
 </style>
