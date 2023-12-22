@@ -1,6 +1,16 @@
 <template>
   <div :class="backgroundMapper[albums[index].name.toLowerCase()]" id="app">
     <div>
+      <trash-icon
+          size="6x"
+          style="cursor: pointer"
+          >
+        </trash-icon>
+        <edit-icon
+          size="6x"
+          style="cursor: pointer"
+          >
+        </edit-icon>
       oiaaaa
     </div>
     <div class="d-flex h-80 align-items-center"> 
@@ -19,15 +29,31 @@
           <b-img v-else :src="albums[albums.length - 1].image_url" class="rounded image-size">
             </b-img>
         </b-col>
-        <b-col class="d-flex justify-content-center" cols="3">
-          <b-img :src="albums[index].image_url" class="rounded image-size">
+        <b-col class="d-flex justify-content-center position-relative" cols="3">
+          <b-img :src="albums[index].image_url" class="rounded image-size detail-album-image" @mouseover="hover=true" @mouseleave="hover=false">
           </b-img>
+          <div v-if="hover" class="detail-album-content rounded">
+            <b-row class="pt-2">
+              Álbum: {{ albums[index].name }}, {{ albums[index].year }} - {{ albums[index].recorder }}
+            </b-row>
+            <b-row class="pt-1 align-text">
+              Descrição: {{ albums[index].description }}
+            </b-row>
+            <b-row class="pt-1">
+              Faixas: 
+              <ul>
+                <li v-for="i, index in albums[index].tracks" :key="index">{{i}}</li>
+              </ul>
+            </b-row>
+            <b-row style="margin-top: -10px">
+              Valor: R$ {{ albums[index].valor }}
+            </b-row>
+          </div>
         </b-col>
         <b-col class="d-flex justify-content-center" cols="3">
           <b-img v-if="albums[index + 1]" :src="albums[index + 1].image_url" class="rounded image-size">
           </b-img>
           <b-img v-else :src="albums[0].image_url" class="rounded image-size"></b-img>
-
         </b-col>
         <b-col class="align-self-center">
           <chevron-right-icon
@@ -43,16 +69,19 @@
 </template>
 
 <script>
-import { ChevronLeftIcon, ChevronRightIcon} from 'vue-feather-icons'
+import { ChevronLeftIcon, ChevronRightIcon, TrashIcon, EditIcon} from 'vue-feather-icons'
 
 export default {
   components: {
+    EditIcon,
+    TrashIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
   },
   name: 'App',
   data() {
     return {
+      hover: false,
       index: 1,
       selectedAlbum: {
         name: 'evermore'
@@ -67,6 +96,23 @@ export default {
           description: 'Evermore é o nono álbum de estúdio da cantora e compositora estadunidense Taylor Swift. O seu lançamento ocorreu em 11 de dezembro de 2020, através da gravadora Republic Records, menos de cinco meses após Folklore, seu oitavo álbum de estúdio.',
           recorder: 'Republic Records',
           tracks: [
+            'willow',
+            'champagne problems',
+            'gold rush',
+            '\'this the damn season',
+            'tolerate it',
+            'no body, no crime (feat. HAIM)',
+            'hapiness',
+            'dorothea',
+            'coney island (feat. The National)',
+            'ivy',
+            'cowboy like me',
+            'long story short',
+            'marjorie',
+            'closure',
+            'evermore (feat. Bon Iver)',
+            'right where you left me - bonus track',
+            'it\'s time to go - bonus track',
             'willow',
             'champagne problems',
             'gold rush',
@@ -201,6 +247,7 @@ export default {
 </script>
 
 <style>
+@import url("https://fonts.googleapis.com/css?family=Rubik");
 html,
 body {
   height: 100vh;
@@ -210,8 +257,8 @@ body {
 
 #app {
   height: inherit;
+  font-family: "Rubik";
   width: inherit;
-  font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -273,5 +320,29 @@ body {
 
 .main-row-position {
   padding-top: 50px
+}
+.detail-album-image {
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 50;
+}
+.detail-album-image:hover {
+  transform: scale(1.2);
+  filter: grayscale(20%) brightness(0.3)
+}
+.detail-album-content {
+  position: absolute;
+  top: 0;
+  left: 40;
+  width: 85%;
+  max-height: 100%;
+  transform: scale(1.2);
+  color: white;
+  font-size: 11px;
+}
+.align-text {
+  text-align: justify;
+  text-justify: inter-character
 }
 </style>
