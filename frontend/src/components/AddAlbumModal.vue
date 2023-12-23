@@ -1,38 +1,38 @@
 <template>
     <div>
         <b-row class="pt-1 px-2">
-            <label for="title-input" style="margin-left: -6px">Título do álbum:</label>
+            <label for="title-input" style="margin-left: -6px">Título do álbum*:</label>
             <b-form-input id="title-input" v-model="albumName">
             </b-form-input>
         </b-row>
         <b-row class="pt-1 px-2">
-            <label for="release-date-input" style="margin-left: -6px">Ano de lançamento do álbum:</label>
+            <label for="release-date-input" style="margin-left: -6px">Ano de lançamento do álbum*:</label>
             <b-form-input id="release-date-input" v-model="releaseYear">
             </b-form-input>
         </b-row>
         <b-row class="pt-1 px-2">
-            <label for="recorder-input" style="margin-left: -6px">Gravadora:</label>
+            <label for="recorder-input" style="margin-left: -6px">Gravadora*:</label>
             <b-form-input id="recorder-input" v-model="recorder">
             </b-form-input>
         </b-row>
         <b-row class="pt-1 px-2">
-            <label for="description-input" style="margin-left: -6px">Descrição:</label>
+            <label for="description-input" style="margin-left: -6px">Descrição*:</label>
             <b-form-textarea id="description-input" v-model="description" rows="5" no-resize>
             </b-form-textarea>
         </b-row>
         <b-row class="pt-1 px-2">
-            <label for="value-input" style="margin-left: -6px">Valor do álbum:</label>
+            <label for="value-input" style="margin-left: -6px">Valor do álbum*:</label>
             <b-form-input id="value-input" v-model="value">
             </b-form-input>
         </b-row>
         <b-row class="pt-1 px-2">
-            <label for="image-url-input" style="margin-left: -6px">URL da imagem da capa do álbum:</label>
+            <label for="image-url-input" style="margin-left: -6px">URL da imagem da capa do álbum*:</label>
             <b-form-input id="image-url-input" v-model="imageUrl">
             </b-form-input>
         </b-row>
         <b-row class="pt-1 px-2">
             <b-col cols="11">
-                <label for="tracks-input" style="margin-left: -6px">Adicionar faixa:</label>
+                <label for="tracks-input" style="margin-left: -6px">Adicionar faixa*:</label>
                 <b-form-input id="tracks-input" v-model="track" style="margin-left: -12px">
                 </b-form-input>
             </b-col>

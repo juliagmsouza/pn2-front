@@ -1,9 +1,10 @@
 <template>
-  <div :class="backgroundMapper[albums[index].name.toLowerCase()]" id="app">
-    <div class="d-flex h-80 align-items-center" style="position: absolute; top: 17%;">
+  <div :class="isAuthenticated ? backgroundMapper[albums[index].name.toLowerCase()] : 'default-background'" id="app">
+    <div v-if="isAuthenticated" class="d-flex h-80 align-items-center" style="position: absolute; top: 17%;">
       <b-col>
         <b-row>
-          <b-button  @click="openModal('add-album-modal')" style="width: 10%; margin-left: 75.75%; margin-bottom: 1%" variant="dark">
+          <b-button @click="openModal('add-album-modal')" style="width: 10%; margin-left: 75.75%; margin-bottom: 1%"
+            variant="dark">
             Adicionar álbum
           </b-button>
         </b-row>
@@ -33,7 +34,8 @@
                 <trash-icon size="1x" style="cursor: pointer">
                 </trash-icon>
               </b-button>
-              <b-button @click="setSelectedAlbumInfo(albums[index])" style="z-index: 10" variant="dark" class="align-edit-icon">
+              <b-button @click="setSelectedAlbumInfo(albums[index])" style="z-index: 10" variant="dark"
+                class="align-edit-icon">
                 <edit-icon size="1x" style="cursor: pointer">
                 </edit-icon>
               </b-button>
@@ -68,20 +70,47 @@
         </b-row>
       </b-col>
     </div>
+    <div class="container-login">
+      <div class="text">
+        <b-row>
+          <strong class="align-login-text">Login</strong>
+        </b-row>
+        <b-row>
+          <label for="email-credential" style="margin-left: -6px">Email:</label>
+          <b-form-input id="email-credential" v-model="emailCredential" placeholder="julia.souza@pucminas.com.br">
+          </b-form-input>
+        </b-row>
+        <b-row class="mt-2">
+          <label for="password-credential" style="margin-left: -6px">Senha:</label>
+          <b-form-input type="password" id="password-credential" v-model="passwordCredential" placeholder="********">
+          </b-form-input>
+        </b-row>
+        <b-row align-h="center" class="mt-3" style="margin-bottom: -1%">
+          <b-button size="sm" style="width: 30%">
+            Entrar
+          </b-button>
+        </b-row>
+        <hr style="border: 1px solid rgba(255, 255, 255, 1)">
+        <b-row class="text-center mt-3" style="margin-bottom: -1%">
+          <b-col>
+            <u @click="openModal('create-account-modal')" style="cursor: pointer">Criar conta</u>
+          </b-col>
+        </b-row>
+      </div>
+    </div>
     <!--MODALS-->
     <b-modal id="confirm-delete-album-modal" cancel-title="Cancelar" ok-title="Excluir" hide-header>
       <ConfirmDeleteAlbumModal />
     </b-modal>
-    <b-modal id="add-album-modal" cancel-title="Cancelar" ok-title="Adicionar" hide-header hide-footer @hide="selectedAlbum = {}">
-      <AddAlbumModal 
-        :currentAlbumName="selectedAlbum.name"
-        :currentReleaseYear="selectedAlbum.year"
-        :currentRecorder="selectedAlbum.recorder"
-        :currentDescription="selectedAlbum.description"
-        :currentValue="selectedAlbum.valor"
-        :currentImageUrl="selectedAlbum.image_url"
-        :currentTracks="selectedAlbum.tracks"
-      />
+    <b-modal id="add-album-modal" cancel-title="Cancelar" ok-title="Adicionar" hide-header hide-footer
+      @hide="selectedAlbum = {}">
+      <AddAlbumModal :currentAlbumName="selectedAlbum.name" :currentReleaseYear="selectedAlbum.year"
+        :currentRecorder="selectedAlbum.recorder" :currentDescription="selectedAlbum.description"
+        :currentValue="selectedAlbum.valor" :currentImageUrl="selectedAlbum.image_url"
+        :currentTracks="selectedAlbum.tracks" />
+    </b-modal>
+    <b-modal id="create-account-modal" cancel-title="Cancelar" ok-title="Criar" hide-header hide-footer>
+      <CreateAccountModal/>
     </b-modal>
   </div>
 </template>
@@ -90,6 +119,7 @@
 import { ChevronLeftIcon, ChevronRightIcon, TrashIcon, EditIcon, InfoIcon } from 'vue-feather-icons'
 import AddAlbumModal from './components/AddAlbumModal.vue'
 import ConfirmDeleteAlbumModal from './components/ConfirmDeleteAlbumModal.vue'
+import CreateAccountModal from './components/CreateAccountModal.vue'
 
 export default {
   components: {
@@ -99,11 +129,15 @@ export default {
     AddAlbumModal,
     ChevronLeftIcon,
     ChevronRightIcon,
+    CreateAccountModal,
     ConfirmDeleteAlbumModal,
   },
   name: 'App',
   data() {
     return {
+      passwordCredential: '',
+      emailCredential: '',
+      isAuthenticated: false,
       hover: false,
       index: 1,
       selectedAlbum: {
@@ -396,5 +430,28 @@ body {
   position: absolute;
   top: 88%;
   left: 2.5%;
+}
+
+.default-background {
+  background: url("./assets/AA.png");
+}
+
+.container-login {
+  width: 27%;
+  background-color: transparent;
+  padding: 25px;
+  border: 2px solid #FFFFFF;
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  position: absolute;
+  top: 40%;
+  left: 40%
+}
+.align-login-text {
+  margin-left: -2%;
+  margin-bottom: 2%
+}
+.text {
+  color: #FFFFFF
 }
 </style>
