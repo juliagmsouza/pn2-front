@@ -1,82 +1,105 @@
 <template>
   <div :class="backgroundMapper[albums[index].name.toLowerCase()]" id="app">
-    <div>
-      <trash-icon
-          size="6x"
-          style="cursor: pointer"
-          >
-        </trash-icon>
-        <edit-icon
-          size="6x"
-          style="cursor: pointer"
-          >
-        </edit-icon>
-      oiaaaa
-    </div>
-    <div class="d-flex h-80 align-items-center"> 
-      <b-row class="w-100" align-h="center">
-        <b-col class="align-self-center d-flex justify-content-end">
-          <chevron-left-icon
-          style="cursor: pointer"
-          size="6x"
-          @click="previousAlbum"
-          >
-        </chevron-left-icon>
-        </b-col>
-        <b-col class="d-flex justify-content-center" cols="3">
-          <b-img v-if="albums[index - 1]" :src="albums[index - 1].image_url" class="rounded image-size">
-          </b-img>
-          <b-img v-else :src="albums[albums.length - 1].image_url" class="rounded image-size">
+    <div class="d-flex h-80 align-items-center" style="position: absolute; top: 17%;">
+      <b-col>
+        <b-row>
+          <b-button  @click="openModal('add-album-modal')" style="width: 10%; margin-left: 75.75%; margin-bottom: 1%" variant="dark">
+            Adicionar álbum
+          </b-button>
+        </b-row>
+        <b-row class="w-100" align-h="center">
+          <b-col class="align-self-center d-flex justify-content-end">
+            <chevron-left-icon style="cursor: pointer" size="6x" @click="previousAlbum">
+            </chevron-left-icon>
+          </b-col>
+          <b-col class="d-flex justify-content-center" cols="3">
+            <b-img v-if="albums[index - 1]" :src="albums[index - 1].image_url" class="rounded image-size">
             </b-img>
-        </b-col>
-        <b-col class="d-flex justify-content-center position-relative" cols="3">
-          <b-img :src="albums[index].image_url" class="rounded image-size detail-album-image" @mouseover="hover=true" @mouseleave="hover=false">
-          </b-img>
-          <div v-if="hover" class="detail-album-content rounded">
-            <b-row class="pt-2">
-              Álbum: {{ albums[index].name }}, {{ albums[index].year }} - {{ albums[index].recorder }}
-            </b-row>
-            <b-row class="pt-1 align-text">
-              Descrição: {{ albums[index].description }}
-            </b-row>
-            <b-row class="pt-1">
-              Faixas: 
-              <ul>
-                <li v-for="i, index in albums[index].tracks" :key="index">{{i}}</li>
-              </ul>
-            </b-row>
-            <b-row style="margin-top: -10px">
-              Valor: R$ {{ albums[index].valor }}
-            </b-row>
-          </div>
-        </b-col>
-        <b-col class="d-flex justify-content-center" cols="3">
-          <b-img v-if="albums[index + 1]" :src="albums[index + 1].image_url" class="rounded image-size">
-          </b-img>
-          <b-img v-else :src="albums[0].image_url" class="rounded image-size"></b-img>
-        </b-col>
-        <b-col class="align-self-center">
-          <chevron-right-icon
-          size="6x"
-          style="cursor: pointer"
-          @click="nextAlbum"
-          >
-        </chevron-right-icon>
-        </b-col>
-      </b-row>
+            <b-img v-else :src="albums[albums.length - 1].image_url" class="rounded image-size">
+            </b-img>
+          </b-col>
+          <b-col class="d-flex justify-content-center position-relative" cols="3">
+            <b-img style="z-index: 1" :src="albums[index].image_url" class="rounded image-size detail-album-image"
+              :class="hover ? 'detail-album-image-hover' : ''" @mouseleave="hover = false">
+            </b-img>
+            <div v-if="!hover" class="w-100 h-100 position-relative">
+              <b-button style="z-index: 10" variant="dark" class="align-details-icon" @click="hover = true">
+                <info-icon size="1x" style="cursor: pointer">
+                </info-icon>
+                Ver detalhes
+              </b-button>
+              <b-button style="z-index: 10" variant="dark" class="align-delete-icon"
+                @click="openModal('confirm-delete-album-modal')">
+                <trash-icon size="1x" style="cursor: pointer">
+                </trash-icon>
+              </b-button>
+              <b-button @click="setSelectedAlbumInfo(albums[index])" style="z-index: 10" variant="dark" class="align-edit-icon">
+                <edit-icon size="1x" style="cursor: pointer">
+                </edit-icon>
+              </b-button>
+            </div>
+            <div style="z-index: 2" v-if="hover" class="detail-album-content rounded">
+              <b-row class="pt-2">
+                Álbum: {{ albums[index].name }}, {{ albums[index].year }} - {{ albums[index].recorder }}
+              </b-row>
+              <b-row class="pt-1 align-text">
+                Descrição: {{ albums[index].description }}
+              </b-row>
+              <b-row class="pt-1">
+                Faixas:
+                <ul>
+                  <li v-for="i, index in albums[index].tracks" :key="index">{{ i }}</li>
+                </ul>
+              </b-row>
+              <b-row style="margin-top: -10px">
+                Valor: R$ {{ albums[index].valor }}
+              </b-row>
+            </div>
+          </b-col>
+          <b-col class="d-flex justify-content-center" cols="3">
+            <b-img v-if="albums[index + 1]" :src="albums[index + 1].image_url" class="rounded image-size">
+            </b-img>
+            <b-img v-else :src="albums[0].image_url" class="rounded image-size"></b-img>
+          </b-col>
+          <b-col class="align-self-center">
+            <chevron-right-icon size="6x" style="cursor: pointer" @click="nextAlbum">
+            </chevron-right-icon>
+          </b-col>
+        </b-row>
+      </b-col>
     </div>
+    <!--MODALS-->
+    <b-modal id="confirm-delete-album-modal" cancel-title="Cancelar" ok-title="Excluir" hide-header>
+      <ConfirmDeleteAlbumModal />
+    </b-modal>
+    <b-modal id="add-album-modal" cancel-title="Cancelar" ok-title="Adicionar" hide-header hide-footer @hide="selectedAlbum = {}">
+      <AddAlbumModal 
+        :currentAlbumName="selectedAlbum.name"
+        :currentReleaseYear="selectedAlbum.year"
+        :currentRecorder="selectedAlbum.recorder"
+        :currentDescription="selectedAlbum.description"
+        :currentValue="selectedAlbum.valor"
+        :currentImageUrl="selectedAlbum.image_url"
+        :currentTracks="selectedAlbum.tracks"
+      />
+    </b-modal>
   </div>
 </template>
 
 <script>
-import { ChevronLeftIcon, ChevronRightIcon, TrashIcon, EditIcon} from 'vue-feather-icons'
+import { ChevronLeftIcon, ChevronRightIcon, TrashIcon, EditIcon, InfoIcon } from 'vue-feather-icons'
+import AddAlbumModal from './components/AddAlbumModal.vue'
+import ConfirmDeleteAlbumModal from './components/ConfirmDeleteAlbumModal.vue'
 
 export default {
   components: {
+    InfoIcon,
     EditIcon,
     TrashIcon,
+    AddAlbumModal,
     ChevronLeftIcon,
     ChevronRightIcon,
+    ConfirmDeleteAlbumModal,
   },
   name: 'App',
   data() {
@@ -233,14 +256,21 @@ export default {
   },
   methods: {
     nextAlbum() {
-      if(this.index === this.albums.length -1) {
+      if (this.index === this.albums.length - 1) {
         this.index = 0;
       } else this.index++;
     },
     previousAlbum() {
-      if(this.index === 0) {
+      if (this.index === 0) {
         this.index = this.albums.length - 1;
       } else this.index--;
+    },
+    openModal(val) {
+      this.$bvModal.show(val)
+    },
+    setSelectedAlbumInfo(val) {
+      this.selectedAlbum = val
+      this.openModal('add-album-modal')
     }
   }
 }
@@ -248,6 +278,7 @@ export default {
 
 <style>
 @import url("https://fonts.googleapis.com/css?family=Rubik");
+
 html,
 body {
   height: 100vh;
@@ -290,7 +321,7 @@ body {
 
 .reputation-background-color {
   background: rgb(108, 117, 125);
-  background: radial-gradient(circle, rgba(108, 117, 125, 1) 0%, rgba(0, 0, 0, 1) 100%);
+  background: radial-gradient(circle, rgba(0, 0, 0, 1) 0%, rgba(108, 117, 125, 1) 100%);
 }
 
 .lover-background-color {
@@ -321,16 +352,18 @@ body {
 .main-row-position {
   padding-top: 50px
 }
+
 .detail-album-image {
-  cursor: pointer;
   position: absolute;
   top: 0;
   left: 50;
 }
-.detail-album-image:hover {
+
+.detail-album-image-hover {
   transform: scale(1.2);
   filter: grayscale(20%) brightness(0.3)
 }
+
 .detail-album-content {
   position: absolute;
   top: 0;
@@ -341,8 +374,27 @@ body {
   color: white;
   font-size: 11px;
 }
+
 .align-text {
   text-align: justify;
   text-justify: inter-character
+}
+
+.align-delete-icon {
+  position: absolute;
+  top: 88%;
+  left: 87%;
+}
+
+.align-edit-icon {
+  position: absolute;
+  top: 88%;
+  left: 74%;
+}
+
+.align-details-icon {
+  position: absolute;
+  top: 88%;
+  left: 2.5%;
 }
 </style>
