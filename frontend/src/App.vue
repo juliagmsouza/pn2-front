@@ -1,7 +1,7 @@
 <template>
-  <div :class="isAuthenticated && !loading ? backgroundMapper[albums[index].name.toLowerCase()] : 'default-background'"
+  <div :class="isAuthenticated && !loading ? backgroundMapper[albums[index].name.toLowerCase()] || backgroundMapper.default : 'default-background'"
     id="app">
-    <b-spinner Label="Spinning" v-if="isAuthenticated && loading"
+    <b-spinner v-if="isAuthenticated && loading"
       style="width: 250px; height: 250px; position: absolute; top: 33%; left: 42%">
     </b-spinner>
     <div v-if="isAuthenticated && !loading" class="d-flex h-80 align-items-center" style="position: absolute; top: 17%;">
@@ -23,42 +23,45 @@
             <b-img v-else-if="albums.length > 2" :src="albums[albums.length - 1].image_url" class="rounded image-size">
             </b-img>
           </b-col>
-          <b-col class="d-flex justify-content-center position-relative" cols="3">
+          <b-col @mouseleave="hover = false" class="d-flex justify-content-center position-relative" cols="3">
             <b-img style="z-index: 1" :src="albums[index].image_url" class="rounded image-size detail-album-image"
-              :class="hover ? 'detail-album-image-hover' : ''" @mouseleave="hover = false">
-            </b-img>
+            :class="hover ? 'detail-album-image-hover' : ''">
+          </b-img>
             <div v-if="!hover" class="w-100 h-100 position-relative">
-              <b-button style="z-index: 10" variant="dark" class="align-details-icon" @click="hover = true">
+              <b-button style="z-index: 10" variant="dark" class="align-details-icon"
+                @click="hover = true; detailAlbum(albums[index].id)">
                 <info-icon size="1x" style="cursor: pointer">
                 </info-icon>
                 Ver detalhes
               </b-button>
               <b-button style="z-index: 10" variant="dark" class="align-delete-icon"
-                @click="openModal('confirm-delete-album-modal')">
-                <trash-icon size="1x" style="cursor: pointer">
-                </trash-icon>
-              </b-button>
-              <b-button @click="setSelectedAlbumInfo(albums[index])" style="z-index: 10" variant="dark"
+              @click="setSelectedAlbum(albums[index])">
+              <trash-icon size="1x" style="cursor: pointer">
+              </trash-icon>
+            </b-button>
+            <b-button @click="setSelectedAlbumInfo(albums[index])" style="z-index: 10" variant="dark"
                 class="align-edit-icon">
                 <edit-icon size="1x" style="cursor: pointer">
                 </edit-icon>
               </b-button>
             </div>
-            <div style="z-index: 2" v-if="hover" class="detail-album-content rounded">
+            <b-spinner v-if="loadingDetails" variant="white" style="z-index: 10; position: absolute; width: 100px; height: 100px; top: 45%; left: 38%">
+            </b-spinner>
+            <div style="z-index: 2" v-if="hover && !loadingDetails" class="detail-album-content rounded">
               <b-row class="pt-2">
-                Álbum: {{ albums[index].name }}, {{ albums[index].year }} - {{ albums[index].recorder }}
+                Álbum: {{ albumDetails.name }}, {{ albumDetails.year }} - {{ albumDetails.recorder }}
               </b-row>
               <b-row class="pt-1 align-text">
-                Descrição: {{ albums[index].description }}
+                Descrição: {{ albumDetails.description }}
               </b-row>
               <b-row class="pt-1">
                 Faixas:
                 <ul>
-                  <li v-for="i, index in albums[index].tracks" :key="index">{{ i }}</li>
+                  <li v-for="i, index in albumDetails.tracks" :key="index">{{ i }}</li>
                 </ul>
               </b-row>
               <b-row style="margin-top: -10px">
-                Valor: R$ {{ albums[index].valor }}
+                Valor: R$ {{ albumDetails.valor }}
               </b-row>
             </div>
           </b-col>
@@ -103,15 +106,15 @@
       </div>
     </div>
     <!--MODALS-->
-    <b-modal id="confirm-delete-album-modal" cancel-title="Cancelar" ok-title="Excluir" hide-header>
+    <b-modal id="confirm-delete-album-modal" cancel-title="Cancelar" ok-title="Excluir" @ok="deleteAlbum(selectedAlbum.id)" hide-header>
       <ConfirmDeleteAlbumModal />
     </b-modal>
     <b-modal id="add-album-modal" cancel-title="Cancelar" ok-title="Adicionar" hide-header hide-footer
       @hide="selectedAlbum = {}">
       <AddAlbumModal :currentAlbumName="selectedAlbum.name" :currentReleaseYear="selectedAlbum.year"
         :currentRecorder="selectedAlbum.recorder" :currentDescription="selectedAlbum.description"
-        :currentValue="selectedAlbum.valor" :currentImageUrl="selectedAlbum.image_url"
-        :currentTracks="selectedAlbum.tracks" />
+        :currentValue="selectedAlbum.valor" :currentImageUrl="selectedAlbum.image_url" :albumId="selectedAlbum.id"
+        :currentTracks="selectedAlbum.tracks" :token="token" />
     </b-modal>
     <b-modal id="create-account-modal" cancel-title="Cancelar" ok-title="Criar" hide-header hide-footer>
       <CreateAccountModal />
@@ -140,6 +143,8 @@ export default {
   name: 'App',
   data() {
     return {
+      albumDetails: {},
+      loadingDetails: false,
       loading: true,
       token: '',
       baseUrl: 'https://taylorswiftalbums.onrender.com',
@@ -162,9 +167,15 @@ export default {
         'lover': 'lover-background-color',
         'folklore': 'folklore-background-color',
         'evermore': 'evermore-background-color',
-        'midnights': 'midnights-background-color'
+        'midnights': 'midnights-background-color',
+        'default': 'midnights-background-color'
       }
     }
+  },
+  mounted() {
+    this.$root.$on('reloadList', async () => {
+      await this.listAlbums()
+    })
   },
   methods: {
     nextAlbum() {
@@ -180,8 +191,10 @@ export default {
     openModal(val) {
       this.$bvModal.show(val)
     },
-    setSelectedAlbumInfo(val) {
-      this.selectedAlbum = val
+    async setSelectedAlbumInfo(val) {
+      await this.detailAlbum(val.id, true)
+      this.selectedAlbum = this.albumDetails
+      console.log('selected', this.selectedAlbum)
       this.openModal('add-album-modal')
     },
     async login() {
@@ -202,12 +215,13 @@ export default {
       }
     },
     async listAlbums() {
+      console.log('ta aqui', this.token)
       try {
         this.loading = true
         const response = await axios.get(`${this.baseUrl}/albums`, { headers: { authorization: this.token } })
         if (response.status === 200) {
           this.albums = response.data
-          if(this.albums.length === 1) {
+          if (this.albums.length === 1) {
             this.index = 0;
           }
           this.loading = false
@@ -215,7 +229,36 @@ export default {
       } catch (err) {
         alert('Erro inesperado ao listar álbums. Por favor tente novamente!')
       }
-    } 
+    },
+    async detailAlbum(id, isEdit = false) {
+      try {
+        if (!isEdit) {
+          this.loadingDetails = true
+        }  
+        const response = await axios.get(`${this.baseUrl}/album/${id}`, { headers: { authorization: this.token } })
+        if (response.status === 200) {
+          this.albumDetails = response.data[0]
+          this.loadingDetails = false
+        }
+      } catch (err) {
+        alert('Erro inesperado ao detalhar álbum. Por favor tente novamente!')
+      }
+    },
+    async deleteAlbum(id) {
+      try {
+        const response = await axios.delete(`${this.baseUrl}/album/${id}`, { headers: { authorization: this.token } })
+        if (response.status === 200) {
+          await this.listAlbums()
+          alert('Álbum deletado com sucesso!')
+        }
+      } catch (err) {
+        alert('Erro inesperado ao deletar álbum. Por favor tente novamente!')
+      }
+    },
+    async setSelectedAlbum(val) {
+      this.selectedAlbum = val
+      this.openModal('confirm-delete-album-modal')
+    }
   }
 }
 </script>

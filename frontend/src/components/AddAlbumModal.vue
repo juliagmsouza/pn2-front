@@ -56,8 +56,14 @@
                 <b-button @click="closeModal" variant="secondary">
                     Cancelar
                 </b-button>
-                <b-button style="margin-left: 4%; margin-right: 3%" variant="primary" :disabled="albumName.length === 0 || releaseYear.length === 0 || recorder.length === 0 || description.length === 0 || value.length === 0 || imageUrl.length === 0 || tracks.length === 0">
-                    {{ currentAlbumName ? 'Editar Álbum' : 'Adicionar Álbum' }}
+                <b-button v-if="currentAlbumName" @click="editAlbum" style="margin-left: 4%; margin-right: 3%"
+                    variant="primary"
+                    :disabled="albumName.length === 0 || releaseYear.length === 0 || recorder.length === 0 || description.length === 0 || value.length === 0 || imageUrl.length === 0 || tracks.length === 0">
+                    Editar Álbum
+                </b-button>
+                <b-button v-else @click="addAlbum" style="margin-left: 4%; margin-right: 3%" variant="primary"
+                    :disabled="albumName.length === 0 || releaseYear.length === 0 || recorder.length === 0 || description.length === 0 || value.length === 0 || imageUrl.length === 0 || tracks.length === 0">
+                    Adicionar Álbum
                 </b-button>
             </b-col>
         </b-row>
@@ -66,6 +72,7 @@
 
 <script>
 import { PlusIcon } from 'vue-feather-icons'
+import axios from 'axios'
 export default {
     components: {
         PlusIcon
@@ -77,7 +84,9 @@ export default {
         currentDescription: { type: String, required: false, default: '' },
         currentValue: { type: String, required: false, default: '' },
         currentImageUrl: { type: String, required: false, default: '' },
-        currentTracks: { type: Array, required: false, default: () => {return []} }
+        currentTracks: { type: Array, required: false, default: () => { return [] } },
+        albumId: { type: Number, required: false, default: 0 },
+        token: { type: String, required: true }
     },
     data() {
         return {
@@ -89,9 +98,10 @@ export default {
             imageUrl: '',
             track: '',
             tracks: [],
+            baseUrl: 'https://taylorswiftalbums.onrender.com',
         }
     },
-    mounted(){
+    mounted() {
         this.albumName = this.currentAlbumName
         this.releaseYear = this.currentReleaseYear
         this.recorder = this.currentRecorder
@@ -107,6 +117,46 @@ export default {
         },
         closeModal() {
             this.$bvModal.hide('add-album-modal')
+        },
+        async addAlbum() {
+            try {
+                const data = {
+                    name: this.albumName,
+                    year: this.releaseYear,
+                    description: this.description,
+                    valor: this.value,
+                    image_url: this.imageUrl,
+                    recorder: this.recorder,
+                    tracks: this.tracks,
+                }
+                const response = await axios.post(`${this.baseUrl}/album`, data, { headers: { authorization: this.token } })
+                if (response.status === 201) {
+                    this.closeModal()
+                    this.$root.$emit('reloadList')
+                }
+            } catch (err) {
+                alert('Erro inesperado ao adicionar álbum. Por favor tente novamente!')
+            }
+        },
+        async editAlbum() {
+            try {
+                const data = {
+                    name: this.albumName,
+                    year: this.releaseYear,
+                    description: this.description,
+                    valor: this.value,
+                    image_url: this.imageUrl,
+                    recorder: this.recorder,
+                    tracks: this.tracks,
+                }
+                const response = await axios.put(`${this.baseUrl}/album/${this.albumId}`, data, { headers: { authorization: this.token } })
+                if (response.status === 200) {
+                    this.closeModal()
+                    alert('Album editado com sucesso!')
+                }
+            } catch (err) {
+                alert('Erro inesperado ao editar álbum. Por favor tente novamente!')
+            }
         }
     }
 }
