@@ -1,6 +1,10 @@
 <template>
-  <div :class="isAuthenticated ? backgroundMapper[albums[index].name.toLowerCase()] : 'default-background'" id="app">
-    <div v-if="isAuthenticated" class="d-flex h-80 align-items-center" style="position: absolute; top: 17%;">
+  <div :class="isAuthenticated && !loading ? backgroundMapper[albums[index].name.toLowerCase()] : 'default-background'"
+    id="app">
+    <b-spinner Label="Spinning" v-if="isAuthenticated && loading"
+      style="width: 250px; height: 250px; position: absolute; top: 33%; left: 42%">
+    </b-spinner>
+    <div v-if="isAuthenticated && !loading" class="d-flex h-80 align-items-center" style="position: absolute; top: 17%;">
       <b-col>
         <b-row>
           <b-button @click="openModal('add-album-modal')" style="width: 10%; margin-left: 75.75%; margin-bottom: 1%"
@@ -16,7 +20,7 @@
           <b-col class="d-flex justify-content-center" cols="3">
             <b-img v-if="albums[index - 1]" :src="albums[index - 1].image_url" class="rounded image-size">
             </b-img>
-            <b-img v-else :src="albums[albums.length - 1].image_url" class="rounded image-size">
+            <b-img v-else-if="albums.length > 2" :src="albums[albums.length - 1].image_url" class="rounded image-size">
             </b-img>
           </b-col>
           <b-col class="d-flex justify-content-center position-relative" cols="3">
@@ -70,7 +74,7 @@
         </b-row>
       </b-col>
     </div>
-    <div class="container-login">
+    <div v-else-if="!isAuthenticated && loading" class="container-login">
       <div class="text">
         <b-row>
           <strong class="align-login-text">Login</strong>
@@ -86,7 +90,7 @@
           </b-form-input>
         </b-row>
         <b-row align-h="center" class="mt-3" style="margin-bottom: -1%">
-          <b-button size="sm" style="width: 30%">
+          <b-button @click="login" size="sm" style="width: 30%">
             Entrar
           </b-button>
         </b-row>
@@ -110,7 +114,7 @@
         :currentTracks="selectedAlbum.tracks" />
     </b-modal>
     <b-modal id="create-account-modal" cancel-title="Cancelar" ok-title="Criar" hide-header hide-footer>
-      <CreateAccountModal/>
+      <CreateAccountModal />
     </b-modal>
   </div>
 </template>
@@ -120,6 +124,7 @@ import { ChevronLeftIcon, ChevronRightIcon, TrashIcon, EditIcon, InfoIcon } from
 import AddAlbumModal from './components/AddAlbumModal.vue'
 import ConfirmDeleteAlbumModal from './components/ConfirmDeleteAlbumModal.vue'
 import CreateAccountModal from './components/CreateAccountModal.vue'
+import axios from 'axios'
 
 export default {
   components: {
@@ -135,145 +140,18 @@ export default {
   name: 'App',
   data() {
     return {
+      loading: true,
+      token: '',
+      baseUrl: 'https://taylorswiftalbums.onrender.com',
       passwordCredential: '',
       emailCredential: '',
       isAuthenticated: false,
       hover: false,
       index: 1,
       selectedAlbum: {
-        name: 'evermore'
+        name: ''
       },
-      albums: [
-        {
-          id: 1,
-          name: "evermore",
-          valor: "150.75",
-          year: "2020",
-          image_url: 'https://people.com/thmb/CzW6mR0ScLNkUegGLPM4p6LBSDE=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc():focal(749x0:751x2):format(webp)/taylor-swift-1-1bd711adc60c4534926738641a2acf2f.jpg',
-          description: 'Evermore é o nono álbum de estúdio da cantora e compositora estadunidense Taylor Swift. O seu lançamento ocorreu em 11 de dezembro de 2020, através da gravadora Republic Records, menos de cinco meses após Folklore, seu oitavo álbum de estúdio.',
-          recorder: 'Republic Records',
-          tracks: [
-            'willow',
-            'champagne problems',
-            'gold rush',
-            '\'this the damn season',
-            'tolerate it',
-            'no body, no crime (feat. HAIM)',
-            'hapiness',
-            'dorothea',
-            'coney island (feat. The National)',
-            'ivy',
-            'cowboy like me',
-            'long story short',
-            'marjorie',
-            'closure',
-            'evermore (feat. Bon Iver)',
-            'right where you left me - bonus track',
-            'it\'s time to go - bonus track',
-            'willow',
-            'champagne problems',
-            'gold rush',
-            '\'this the damn season',
-            'tolerate it',
-            'no body, no crime (feat. HAIM)',
-            'hapiness',
-            'dorothea',
-            'coney island (feat. The National)',
-            'ivy',
-            'cowboy like me',
-            'long story short',
-            'marjorie',
-            'closure',
-            'evermore (feat. Bon Iver)',
-            'right where you left me - bonus track',
-            'it\'s time to go - bonus track',
-          ]
-        },
-        {
-          id: 2,
-          name: "lover",
-          valor: "150.75",
-          year: "2020",
-          image_url: 'https://people.com/thmb/vvDOonfXdN5fSqLAioLgg_9AJMY=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc():focal(999x0:1001x2):format(webp)/taylor-swift-lover-2000-e4a62abb38b9483e8d371eda823d2fcb.jpg',
-          description: 'Evermore é o nono álbum de estúdio da cantora e compositora estadunidense Taylor Swift. O seu lançamento ocorreu em 11 de dezembro de 2020, através da gravadora Republic Records, menos de cinco meses após Folklore, seu oitavo álbum de estúdio.',
-          recorder: 'Republic Records',
-          tracks: [
-            'willow',
-            'champagne problems',
-            'gold rush',
-            '\'this the damn season',
-            'tolerate it',
-            'no body, no crime (feat. HAIM)',
-            'hapiness',
-            'dorothea',
-            'coney island (feat. The National)',
-            'ivy',
-            'cowboy like me',
-            'long story short',
-            'marjorie',
-            'closure',
-            'evermore (feat. Bon Iver)',
-            'right where you left me - bonus track',
-            'it\'s time to go - bonus track',
-          ]
-        },
-        {
-          id: 3,
-          name: "Taylor Swift",
-          valor: "150.75",
-          year: "2020",
-          image_url: 'https://people.com/thmb/A7_leo8hc_wPis3erIdrtJYVsG8=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc():focal(999x0:1001x2):format(webp)/taylor-swift-albums-1-93026ca98408417097660e117a10a6a9.jpg',
-          description: 'Evermore é o nono álbum de estúdio da cantora e compositora estadunidense Taylor Swift. O seu lançamento ocorreu em 11 de dezembro de 2020, através da gravadora Republic Records, menos de cinco meses após Folklore, seu oitavo álbum de estúdio.',
-          recorder: 'Republic Records',
-          tracks: [
-            'willow',
-            'champagne problems',
-            'gold rush',
-            '\'this the damn season',
-            'tolerate it',
-            'no body, no crime (feat. HAIM)',
-            'hapiness',
-            'dorothea',
-            'coney island (feat. The National)',
-            'ivy',
-            'cowboy like me',
-            'long story short',
-            'marjorie',
-            'closure',
-            'evermore (feat. Bon Iver)',
-            'right where you left me - bonus track',
-            'it\'s time to go - bonus track',
-          ]
-        },
-        {
-          id: 4,
-          name: "Reputation",
-          valor: "150.75",
-          year: "2020",
-          image_url: 'https://people.com/thmb/DWnqc5Gyvvo0-YQnqNT11rZSqzQ=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc():focal(992x0:994x2):format(webp)/taylor-swift7-2000-48f9bfb372c34e36866773b1ede0b372.jpg',
-          description: 'Evermore é o nono álbum de estúdio da cantora e compositora estadunidense Taylor Swift. O seu lançamento ocorreu em 11 de dezembro de 2020, através da gravadora Republic Records, menos de cinco meses após Folklore, seu oitavo álbum de estúdio.',
-          recorder: 'Republic Records',
-          tracks: [
-            'willow',
-            'champagne problems',
-            'gold rush',
-            '\'this the damn season',
-            'tolerate it',
-            'no body, no crime (feat. HAIM)',
-            'hapiness',
-            'dorothea',
-            'coney island (feat. The National)',
-            'ivy',
-            'cowboy like me',
-            'long story short',
-            'marjorie',
-            'closure',
-            'evermore (feat. Bon Iver)',
-            'right where you left me - bonus track',
-            'it\'s time to go - bonus track',
-          ]
-        }
-      ],
+      albums: [],
       backgroundMapper: {
         'taylor swift': 'taylor-swift-background-color',
         'fearless': 'fearless-background-color',
@@ -305,7 +183,39 @@ export default {
     setSelectedAlbumInfo(val) {
       this.selectedAlbum = val
       this.openModal('add-album-modal')
-    }
+    },
+    async login() {
+      try {
+        const data = {
+          login: this.emailCredential,
+          password: this.passwordCredential
+        }
+        const response = await axios.post(`${this.baseUrl}/security/login`, data)
+        console.log('responseeee', response)
+        if (response.status === 200) {
+          this.token = `Bearer ${response.data.token}`
+          this.listAlbums()
+          this.isAuthenticated = true
+        }
+      } catch (err) {
+        alert('Erro inesperado ao fazer login. Por favor tente novamente!')
+      }
+    },
+    async listAlbums() {
+      try {
+        this.loading = true
+        const response = await axios.get(`${this.baseUrl}/albums`, { headers: { authorization: this.token } })
+        if (response.status === 200) {
+          this.albums = response.data
+          if(this.albums.length === 1) {
+            this.index = 0;
+          }
+          this.loading = false
+        }
+      } catch (err) {
+        alert('Erro inesperado ao listar álbums. Por favor tente novamente!')
+      }
+    } 
   }
 }
 </script>
@@ -444,13 +354,15 @@ body {
   backdrop-filter: blur(10px);
   border-radius: 8px;
   position: absolute;
-  top: 40%;
+  top: 35%;
   left: 40%
 }
+
 .align-login-text {
   margin-left: -2%;
   margin-bottom: 2%
 }
+
 .text {
   color: #FFFFFF
 }

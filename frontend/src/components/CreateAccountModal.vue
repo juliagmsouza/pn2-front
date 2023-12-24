@@ -12,7 +12,7 @@
         </b-row>
         <b-row class="pt-1 px-2">
             <label for="password-input" style="margin-left: -6px">Senha*:</label>
-            <b-form-input id="password-input" v-model="passwordInput">
+            <b-form-input type="password" id="password-input" v-model="passwordInput">
             </b-form-input>
         </b-row>
         <hr style="width: 107%; margin-left: -16px">
@@ -21,7 +21,8 @@
                 <b-button @click="closeModal" variant="secondary">
                     Cancelar
                 </b-button>
-                <b-button style="margin-left: 4%; margin-right: 3%" variant="primary" :disabled="nameInput.length === 0 || emailInput.length === 0 || passwordInput.length === 0">  
+                <b-button @click="createAccount" style="margin-left: 4%; margin-right: 3%" variant="primary"
+                    :disabled="nameInput.length === 0 || emailInput.length === 0 || passwordInput.length === 0">
                     Criar conta
                 </b-button>
             </b-col>
@@ -30,17 +31,37 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
     data() {
         return {
             nameInput: '',
             emailInput: '',
-            passwordInput: ''
+            passwordInput: '',
+            baseUrl: 'https://taylorswiftalbums.onrender.com',
         }
     },
     methods: {
         closeModal() {
             this.$bvModal.hide('create-account-modal')
+        },
+        async createAccount() {
+            try {
+                const data = {
+                    name: this.nameInput,
+                    login: this.emailInput,
+                    email: this.emailInput,
+                    password: this.passwordInput,
+                }
+                const response = await axios.post(`${this.baseUrl}/security/register`, data)
+                if (response.status === 200) {
+                    this.closeModal()
+                    alert('Conta criada com sucesso!')
+                }
+            } catch (err) {
+                alert('Erro inesperado ao criar conta. Por favor tente novamente!')
+            }
         }
     }
 }
